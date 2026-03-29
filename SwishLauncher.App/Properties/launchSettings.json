@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SwishLauncher.App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SwishLauncher.App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
