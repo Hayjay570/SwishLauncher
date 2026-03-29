@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="SwishLauncher.App.Views.MediaDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Background>
+        <AcrylicBrush
+            TintColor="#0A0A0A"
+            TintOpacity="0.55"
+            FallbackColor="#1A1A1A"/>
+    </Page.Background>
+
+    <Grid ColumnDefinitions="*,*" Padding="48,36">
+
+        <!-- ── LEFT: Thumbnail ────────────────────────────────────────── -->
+        <Grid Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border
+                Width="320" Height="420"
+                CornerRadius="16"
+                CacheMode="BitmapCache">
+                <Border.Shadow>
+                    <ThemeShadow/>
+                </Border.Shadow>
+                <Grid>
+                    <Image
+                        Source="{x:Bind ViewModel.ThumbnailPath, Mode=OneWay}"
+                        Stretch="UniformToFill"/>
+                    <FontIcon
+                        Glyph="&#xE8B2;"
+                        FontSize="80"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Opacity="0.3"
+                        Visibility="{x:Bind ViewModel.ThumbnailPath,
+                            Mode=OneWay,
+                            Converter={StaticResource NullToVisibleConverter}}"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ── RIGHT: Single acrylic island ───────────────────────────── -->
+        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0">
+
+            <Border CornerRadius="16" Padding="32">
+                <Border.Background>
+                    <AcrylicBrush
+                        TintColor="#141414"
+                        TintOpacity="0.7"
+                        FallbackColor="#242424"/>
+                </Border.Background>
+                <Border.Shadow>
+                    <ThemeShadow/>
+                </Border.Shadow>
+
+                <StackPanel Spacing="20">
+
+                    <!-- Title + Type + Year (type uppercased in ViewModel) -->
+                    <StackPanel Spacing="4">
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+                            Style="{ThemeResource TitleLargeTextBlockStyle}"
+                            TextWrapping="Wrap"
+                            MaxLines="2"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock
+                                Text="{x:Bind ViewModel.MediaType, Mode=OneWay}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Opacity="0.6"
+                                CharacterSpacing="80"/>
+                            <TextBlock Text="·" Opacity="0.4" Style="{ThemeResource CaptionTextBlockStyle}"/>
+                            <TextBlock
+                                Text="{x:Bind ViewModel.Year, Mode=OneWay}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Opacity="0.6"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Rating -->
+                    <RatingControl
+                        Value="{x:Bind ViewModel.Rating, Mode=OneWay}"
+                        IsReadOnly="True"
+                        MaxRating="5"/>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Opacity="0.3"/>
+
+                    <!-- Description -->
+                    <TextBlock
+                        Text="{x:Bind ViewModel.Description, Mode=OneWay}"
+                        Style="{ThemeResource BodyTextBlockStyle}"
+                        TextWrapping="Wrap"
+                        MaxLines="6"
+                        TextTrimming="CharacterEllipsis"
+                        Opacity="0.85"
+                        LineHeight="22"/>
+
+                    <!-- Date added -->
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="DATE ADDED" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.5" CharacterSpacing="60"/>
+                        <TextBlock Text="{x:Bind ViewModel.DateAdded, Mode=OneWay}" Style="{ThemeResource BodyStrongTextBlockStyle}"/>
+                    </StackPanel>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Opacity="0.3"/>
+
+                    <!-- Action row -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+
+                        <Button
+                            Grid.Column="0"
+                            Content="▶  Play"
+                            Command="{x:Bind ViewModel.PlayCommand}"
+                            IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay,
+                                Converter={StaticResource BoolNegationConverter}}"
+                            Style="{ThemeResource AccentButtonStyle}"
+                            HorizontalAlignment="Stretch"
+                            Height="48"
+                            FontSize="16"/>
+
+                        <Button
+                            Grid.Column="1"
+                            Command="{x:Bind ViewModel.ToggleFavouriteCommand}"
+                            Width="48" Height="48"
+                            ToolTipService.ToolTip="Add to favourites"
+                            Padding="0">
+                            <FontIcon
+                                Glyph="{x:Bind ViewModel.IsFavourite, Mode=OneWay,
+                                    Converter={StaticResource FavouriteGlyphConverter}}"
+                                FontSize="18"/>
+                        </Button>
+
+                    </Grid>
+
+                </StackPanel>
+            </Border>
+        </Grid>
+
+    </Grid>
+</Page>

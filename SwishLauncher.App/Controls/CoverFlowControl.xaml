@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="SwishLauncher.App.Controls.CoverFlowControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+        RootGrid holds the arrow buttons. The ItemsControl + CoverFlowPanel
+        are created entirely in code-behind (XamlReader.Load) and inserted at
+        index 0 so these buttons always render on top.
+    -->
+    <Grid x:Name="RootGrid">
+
+        <Button
+            x:Name="LeftArrow"
+            Content="&#xE76B;"
+            FontFamily="Segoe MDL2 Assets"
+            FontSize="20"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Margin="16,0"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            Click="LeftArrow_Click"/>
+
+        <Button
+            x:Name="RightArrow"
+            Content="&#xE76C;"
+            FontFamily="Segoe MDL2 Assets"
+            FontSize="20"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Margin="16,0"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            Click="RightArrow_Click"/>
+
+    </Grid>
+</UserControl>

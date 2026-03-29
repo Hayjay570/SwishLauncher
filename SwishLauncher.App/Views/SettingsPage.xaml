@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="SwishLauncher.App.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer
+        x:Name="SettingsScroller"
+        UseSystemFocusVisuals="True">
+
+        <StackPanel Padding="48,32" Spacing="24" MaxWidth="640">
+
+            <TextBlock
+                Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+                Style="{ThemeResource TitleTextBlockStyle}"/>
+
+            <!-- Appearance -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="Appearance" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+
+                <RadioButtons Header="App theme" MaxColumns="3">
+                    <RadioButton Content="System default" Tag="Default"
+                                 IsChecked="{x:Bind ViewModel.AppTheme,
+                                     Mode=OneWay,
+                                     Converter={StaticResource ThemeMatchConverter},
+                                     ConverterParameter=Default}"
+                                 Click="ThemeRadio_Click"/>
+                    <RadioButton Content="Light" Tag="Light"
+                                 IsChecked="{x:Bind ViewModel.AppTheme,
+                                     Mode=OneWay,
+                                     Converter={StaticResource ThemeMatchConverter},
+                                     ConverterParameter=Light}"
+                                 Click="ThemeRadio_Click"/>
+                    <RadioButton Content="Dark" Tag="Dark"
+                                 IsChecked="{x:Bind ViewModel.AppTheme,
+                                     Mode=OneWay,
+                                     Converter={StaticResource ThemeMatchConverter},
+                                     ConverterParameter=Dark}"
+                                 Click="ThemeRadio_Click"/>
+                </RadioButtons>
+
+                <ToggleSwitch
+                    Header="High contrast mode"
+                    IsOn="{x:Bind ViewModel.UseHighContrast, Mode=TwoWay}"/>
+            </StackPanel>
+
+            <!-- About -->
+            <StackPanel Spacing="8">
+                <TextBlock Text="About" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                <TextBlock Text="SwishLauncher — Week 2 build" Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.7"/>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

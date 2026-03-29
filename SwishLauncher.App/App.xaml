@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="SwishLauncher.App.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:SwishLauncher.App.Converters">
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Converters available application-wide -->
+            <converters:BoolNegationConverter   x:Key="BoolNegationConverter"/>
+            <converters:ZeroToVisibleConverter  x:Key="ZeroToVisibleConverter"/>
+            <converters:ThemeMatchConverter     x:Key="ThemeMatchConverter"/>
+            <converters:NullToVisibleConverter  x:Key="NullToVisibleConverter"/>
+            <converters:FavouriteGlyphConverter x:Key="FavouriteGlyphConverter"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
