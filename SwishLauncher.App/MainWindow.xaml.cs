@@ -1,22 +1,30 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+<<<<<<< HEAD
 using Microsoft.UI.Xaml.Media.Animation;
 using SwishLauncher.App.Services;
+=======
+using Microsoft.UI.Xaml.Media;
+>>>>>>> 9706f627a483bf1c8f3594c82126f8c90ca9edc6
 using SwishLauncher.App.Views;
 
 namespace SwishLauncher.App;
 
 public sealed partial class MainWindow : Window
 {
+<<<<<<< HEAD
     // Keep a reference so the service isn't GC'd
     private readonly GamepadNavigationService _gamepadNav;
 
+=======
+>>>>>>> 9706f627a483bf1c8f3594c82126f8c90ca9edc6
     public MainWindow()
     {
         InitializeComponent();
         SetupWindow();
 
+<<<<<<< HEAD
         // ── Page transitions ───────────────────────────────────────────────
         // SlideNavigationTransitionInfo gives a horizontal slide between tabs,
         // which feels natural on a TV/gamepad. Swap to DrillInNavigationTransitionInfo
@@ -34,6 +42,14 @@ public sealed partial class MainWindow : Window
         NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
 
         // Escape exits full-screen
+=======
+        NavigationViewControl.SelectionChanged += NavView_SelectionChanged;
+
+        // Set initial selection
+        NavigationViewControl.SelectedItem =
+            NavigationViewControl.MenuItems[0];
+
+>>>>>>> 9706f627a483bf1c8f3594c82126f8c90ca9edc6
         if (Content is FrameworkElement root)
         {
             root.KeyDown += (_, e) =>
@@ -49,6 +65,10 @@ public sealed partial class MainWindow : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(null);
         AppWindow.Title = "SwishLauncher";
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9706f627a483bf1c8f3594c82126f8c90ca9edc6
         DispatcherQueue.TryEnqueue(() =>
             AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen));
     }
@@ -56,6 +76,7 @@ public sealed partial class MainWindow : Window
     private void NavView_SelectionChanged(NavigationView sender,
         NavigationViewSelectionChangedEventArgs args)
     {
+<<<<<<< HEAD
         if (args.SelectedItem is NavigationViewItem { Tag: string tag })
             NavigateTo(tag, args.RecommendedNavigationTransitionInfo);
     }
@@ -90,3 +111,27 @@ public sealed partial class MainWindow : Window
     public void SetPageFocusRegions(params UIElement[] regions)
         => _gamepadNav.RegisterFocusRegions(regions);
 }
+=======
+        if (args.SelectedItem is NavigationViewItem item &&
+            item.Tag is string tag)
+        {
+            NavigateTo(tag);
+        }
+    }
+
+    private void NavigateTo(string tag)
+    {
+        var pageType = tag switch
+        {
+            "Home" => typeof(HomePage),
+            "Games" => typeof(GamesPage),
+            "Media" => typeof(MediaPage),
+            "Settings" => typeof(SettingsPage),
+            _ => typeof(HomePage)
+        };
+
+        if (ContentFrame.CurrentSourcePageType != pageType)
+            ContentFrame.Navigate(pageType);
+    }
+}
+>>>>>>> 9706f627a483bf1c8f3594c82126f8c90ca9edc6
