@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
@@ -53,16 +52,3 @@ public partial class GamesViewModel : BaseViewModel
     [RelayCommand]
     private void SelectGame(GameEntry? game) => SelectedGame = game;
 }
-=======
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using CommunityToolkit.Mvvm.ComponentModel;
-
-namespace SwishLauncher.App.ViewModels;
-
-public partial class GamesViewModel : ObservableObject { }
->>>>>>> 9706f627a483bf1c8f3594c82126f8c90ca9edc6
