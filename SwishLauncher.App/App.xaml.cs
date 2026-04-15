@@ -4,6 +4,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using SwishLauncher.App.ViewModels;
 using SwishLauncher.Core.Data;
+using SwishLauncher.Core.Interfaces;
+using SwishLauncher.Core.Services;
+using SwishLauncher.Games.Sources;
 using System;
 using System.IO;
 using Application = Microsoft.UI.Xaml.Application;
@@ -51,20 +54,23 @@ public partial class App : Application
 
         services.AddDbContext<SwishDbContext>(o =>
             o.UseSqlite($"Data Source={Path.Combine(dbFolder, "swish.db")}"),
-            // Scoped lifetime pairs well with Transient VMs that take the context
             contextLifetime: ServiceLifetime.Transient,
             optionsLifetime: ServiceLifetime.Singleton);
 
+        // ── Game sources ───────────────────────────────────────────────────
+        services.AddTransient<IGameSource, SteamGameSource>();
+        services.AddTransient<IGameSource, XboxGameSource>();
+        services.AddTransient<IGameSource, ManualGameSource>();
+
+        // ── Domain services ────────────────────────────────────────────────
+        services.AddTransient<GameLibraryService>();
+
         // ── ViewModels ─────────────────────────────────────────────────────
-        // Transient: a fresh VM (and fresh DbContext) on every page navigation.
-        // This avoids stale EF Core change-tracker state between visits.
         services.AddTransient<HomeViewModel>();
         services.AddTransient<GamesViewModel>();
         services.AddTransient<MediaViewModel>();
         services.AddTransient<GameDetailViewModel>();
         services.AddTransient<MediaDetailViewModel>();
-
-        // Singleton: settings state (chosen theme, toggles) must survive tab switches.
         services.AddSingleton<SettingsViewModel>();
 
         return services.BuildServiceProvider();

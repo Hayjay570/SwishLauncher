@@ -1,0 +1,114 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using SwishLauncher.Core.Data;
+using SwishLauncher.Core.Interfaces;
+using SwishLauncher.Core.Models;
+
+namespace SwishLauncher.Core.Services;
+
+public class GameLibraryService(
+    SwishDbContext db,
+    IEnumerable<IGameSource> sources,
+    ILogger<GameLibraryService> logger)
+{
+    /// <summary>
+    /// Scans all registered sources, upserts new entries into SQLite,
+    /// and returns the complete library sorted alphabetically.
+    /// </summary>
+    public async Task<IReadOnlyList<GameEntry>> ScanAndSyncAsync(
+        CancellationToken ct = default)
+    {
+        var scanTasks = sources
+            .Select(s => ScanSourceSafeAsync(s, ct))
+            .ToList();
+
+        var results = await Task.WhenAll(scanTasks);
+        var scanned = results.SelectMany(x => x).ToList();
+
+        logger.LogInformation(
+            "Scan complete. {Count} entries found across {Sources} sources.",
+            scanned.Count, sources.Count());
+
+        await UpsertAsync(scanned, ct);
+
+        return await db.Games
+            .AsNoTracking()
+            .OrderBy(g => g.Title)
+            .ToListAsync(ct);
+    }
+
+    /// <summary>
+    /// Returns the persisted library without scanning.
+    /// Used on page navigation when a fresh scan isn't needed.
+    /// </summary>
+    public Task<List<GameEntry>> GetAllAsync(CancellationToken ct = default)
+        => db.Games.AsNoTracking().OrderBy(g => g.Title).ToListAsync(ct);
+
+    private async Task<IEnumerable<GameEntry>> ScanSourceSafeAsync(
+        IGameSource source, CancellationToken ct)
+    {
+        try
+        {
+            var entries = await source.ScanAsync(ct);
+            return entries;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex,
+                "Source '{Source}' failed during scan.", source.SourceName);
+            return [];
+        }
+    }
+
+    private async Task UpsertAsync(IEnumerable<GameEntry> incoming, CancellationToken ct)
+    {
+        // Deduplicate within the incoming batch itself (two sources could theoretically
+        // return the same LaunchUri)
+        var byUri = incoming
+            .GroupBy(e => e.LaunchUri)
+            .Select(g => g.First())
+            .ToList();
+
+        if (byUri.Count == 0) return;
+
+        // Load all existing LaunchUris in one query
+        var existingUris = await db.Games
+            .AsNoTracking()
+            .Select(g => new { g.Id, g.LaunchUri, g.CoverArtPath })
+            .ToListAsync(ct);
+
+        var existingByUri = existingUris.ToDictionary(x => x.LaunchUri, x => x);
+
+        foreach (var entry in byUri)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            if (existingByUri.TryGetValue(entry.LaunchUri, out var existing))
+            {
+                // Update only — use ExecuteUpdate to bypass the change tracker entirely
+                await db.Games
+                    .Where(g => g.Id == existing.Id)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(g => g.Title, entry.Title)
+                        .SetProperty(g => g.Platform, entry.Platform)
+                        .SetProperty(g => g.CoverArtPath,
+                            entry.CoverArtPath ?? existing.CoverArtPath),
+                        ct);
+            }
+            else
+            {
+                entry.DateAdded = DateTime.UtcNow;
+                db.Games.Add(entry);
+            }
+        }
+
+        // SaveChanges only touches the newly Added entries now
+        await db.SaveChangesAsync(ct);
+    }
+}

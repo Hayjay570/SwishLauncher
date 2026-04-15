@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+	  <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <ProjectReference Include="..\SwishLauncher.Core\SwishLauncher.Core.csproj" />
   </ItemGroup>
 

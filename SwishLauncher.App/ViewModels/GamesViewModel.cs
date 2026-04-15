@@ -6,30 +6,30 @@ using SwishLauncher.Core.Models;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
+using SwishLauncher.Core.Services;
+
 namespace SwishLauncher.App.ViewModels;
 
 public partial class GamesViewModel : BaseViewModel
 {
-    private readonly SwishDbContext _db;
+    private readonly GameLibraryService _library;
     private readonly DispatcherQueue _dispatcherQueue;
 
-    /// <summary>Bound to the GridView / ListView on GamesPage.</summary>
     public ObservableCollection<GameEntry> Games { get; } = [];
 
-    [ObservableProperty]
-    private GameEntry? _selectedGame;
+    [ObservableProperty] private GameEntry? _selectedGame;
+    [ObservableProperty] private int _selectedIndex = 0;
 
-    [ObservableProperty]
-    private int _selectedIndex = 0;
-
-    public GamesViewModel(SwishDbContext db)
+    public GamesViewModel(GameLibraryService library)
     {
-        _db = db;
+        _library = library;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         Title = "Games";
     }
 
-    /// <summary>Loads all games from SQLite into the observable collection.</summary>
+    /// <summary>
+    /// Fast load from DB — used on every page navigation.
+    /// </summary>
     [RelayCommand]
     private async Task LoadAsync()
     {
@@ -37,16 +37,29 @@ public partial class GamesViewModel : BaseViewModel
         Games.Clear();
         try
         {
-            await Task.Run(() =>
-            {
-                foreach (var g in _db.Games)
-                    _dispatcherQueue.TryEnqueue(() => Games.Add(g));
-            });
+            var games = await _library.GetAllAsync();
+            foreach (var g in games)
+                Games.Add(g);
         }
-        finally
+        finally { IsBusy = false; }
+    }
+
+    /// <summary>
+    /// Full scan + sync — triggered by the refresh button.
+    /// Can take a few seconds, so it's a separate command.
+    /// </summary>
+    [RelayCommand]
+    private async Task ScanAsync()
+    {
+        IsBusy = true;
+        Games.Clear();
+        try
         {
-            IsBusy = false;
+            var games = await _library.ScanAndSyncAsync();
+            foreach (var g in games)
+                Games.Add(g);
         }
+        finally { IsBusy = false; }
     }
 
     [RelayCommand]

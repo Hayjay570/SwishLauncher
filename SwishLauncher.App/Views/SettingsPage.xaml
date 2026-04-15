@@ -50,7 +50,7 @@
             <!-- About -->
             <StackPanel Spacing="8">
                 <TextBlock Text="About" Style="{ThemeResource SubtitleTextBlockStyle}"/>
-                <TextBlock Text="SwishLauncher — Week 2 build" Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.7"/>
+                <TextBlock Text="Unified launcher for Windows" Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.7"/>
             </StackPanel>
 
         </StackPanel>

@@ -12,7 +12,7 @@
         are created entirely in code-behind (XamlReader.Load) and inserted at
         index 0 so these buttons always render on top.
     -->
-    <Grid x:Name="RootGrid">
+    <Grid x:Name="RootGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
 
         <Button
             x:Name="LeftArrow"

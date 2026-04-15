@@ -17,6 +17,7 @@
             <converters:ThemeMatchConverter     x:Key="ThemeMatchConverter"/>
             <converters:NullToVisibleConverter  x:Key="NullToVisibleConverter"/>
             <converters:FavouriteGlyphConverter x:Key="FavouriteGlyphConverter"/>
+            <converters:PathToImageSourceConverter x:Key="PathToImageSourceConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
