@@ -35,7 +35,12 @@ public partial class MediaDetailViewModel : BaseViewModel
         IsBusy = true;
         try
         {
-            await Windows.System.Launcher.LaunchUriAsync(new Uri(FilePath));
+            // FilePath is a local path like C:\Videos\movie.mp4.
+            // Launcher.LaunchUriAsync requires a proper URI, so build one via
+            // the Uri(string, UriKind) overload which handles absolute local paths,
+            // or explicitly use the file:/// scheme.
+            var uri = new Uri(FilePath, UriKind.Absolute);
+            await Windows.System.Launcher.LaunchUriAsync(uri);
         }
         finally
         {

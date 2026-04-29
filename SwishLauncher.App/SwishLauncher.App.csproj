@@ -24,6 +24,7 @@
     <!-- Views (new — detail pages) -->
     <None Remove="Views\GameDetailPage.xaml" />
     <None Remove="Views\MediaDetailPage.xaml" />
+    <None Remove="Views\MediaFolderPage.xaml" />
     <!-- Controls -->
     <None Remove="Controls\CoverFlowControl.xaml" />
   </ItemGroup>
@@ -91,6 +92,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="Views\MediaDetailPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\MediaFolderPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

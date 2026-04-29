@@ -18,6 +18,8 @@
             <converters:NullToVisibleConverter  x:Key="NullToVisibleConverter"/>
             <converters:FavouriteGlyphConverter x:Key="FavouriteGlyphConverter"/>
             <converters:PathToImageSourceConverter x:Key="PathToImageSourceConverter"/>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:BoolNegationToVisibilityConverter x:Key="BoolNegationToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

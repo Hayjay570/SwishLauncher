@@ -7,6 +7,7 @@ using SwishLauncher.Core.Data;
 using SwishLauncher.Core.Interfaces;
 using SwishLauncher.Core.Services;
 using SwishLauncher.Games.Sources;
+using SwishLauncher.Media.Sources;
 using System;
 using System.IO;
 using Application = Microsoft.UI.Xaml.Application;
@@ -62,8 +63,13 @@ public partial class App : Application
         services.AddTransient<IGameSource, XboxGameSource>();
         services.AddTransient<IGameSource, ManualGameSource>();
 
+        // ── Media sources ──────────────────────────────────────────────────
+        services.AddTransient<IMediaSource, LocalVideoSource>();
+        services.AddTransient<IMediaSource, LocalAudioSource>();
+
         // ── Domain services ────────────────────────────────────────────────
         services.AddTransient<GameLibraryService>();
+        services.AddTransient<MediaLibraryService>();
 
         // ── ViewModels ─────────────────────────────────────────────────────
         services.AddTransient<HomeViewModel>();

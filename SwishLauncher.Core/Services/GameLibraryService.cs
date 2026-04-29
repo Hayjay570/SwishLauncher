@@ -68,8 +68,6 @@ public class GameLibraryService(
 
     private async Task UpsertAsync(IEnumerable<GameEntry> incoming, CancellationToken ct)
     {
-        // Deduplicate within the incoming batch itself (two sources could theoretically
-        // return the same LaunchUri)
         var byUri = incoming
             .GroupBy(e => e.LaunchUri)
             .Select(g => g.First())
@@ -77,7 +75,12 @@ public class GameLibraryService(
 
         if (byUri.Count == 0) return;
 
-        // Load all existing LaunchUris in one query
+        // ── ADD THIS ──────────────────────────────────────────────────────────
+        var validUris = byUri
+            .Select(e => e.LaunchUri)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        // ─────────────────────────────────────────────────────────────────────
+
         var existingUris = await db.Games
             .AsNoTracking()
             .Select(g => new { g.Id, g.LaunchUri, g.CoverArtPath })
@@ -91,7 +94,6 @@ public class GameLibraryService(
 
             if (existingByUri.TryGetValue(entry.LaunchUri, out var existing))
             {
-                // Update only — use ExecuteUpdate to bypass the change tracker entirely
                 await db.Games
                     .Where(g => g.Id == existing.Id)
                     .ExecuteUpdateAsync(s => s
@@ -108,7 +110,18 @@ public class GameLibraryService(
             }
         }
 
-        // SaveChanges only touches the newly Added entries now
         await db.SaveChangesAsync(ct);
+
+        // ── ADD THIS ──────────────────────────────────────────────────────────
+        var toDelete = existingUris
+            .Where(e => !validUris.Contains(e.LaunchUri))
+            .Select(e => e.Id)
+            .ToList();
+
+        if (toDelete.Count > 0)
+            await db.Games
+                .Where(g => toDelete.Contains(g.Id))
+                .ExecuteDeleteAsync(ct);
+        // ─────────────────────────────────────────────────────────────────────
     }
 }

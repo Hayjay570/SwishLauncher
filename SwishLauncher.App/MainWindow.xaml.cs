@@ -53,11 +53,33 @@ public sealed partial class MainWindow : Window
             AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen));
     }
 
+    private bool _navigating;
+
     private void NavView_SelectionChanged(NavigationView sender,
         NavigationViewSelectionChangedEventArgs args)
     {
+        // args.IsSettingsSelected is a focus-driven change when we're mid-navigation;
+        // the more reliable guard is to check if we're already on that page.
+        if (_navigating) return;
+
         if (args.SelectedItem is NavigationViewItem { Tag: string tag })
+        {
+            var pageType = tag switch
+            {
+                "Home" => typeof(HomePage),
+                "Games" => typeof(GamesPage),
+                "Media" => typeof(MediaPage),
+                "Settings" => typeof(SettingsPage),
+                _ => typeof(HomePage)
+            };
+
+            // Don't navigate if focus drifted to the already-active tab
+            if (ContentFrame.CurrentSourcePageType == pageType) return;
+
+            _navigating = true;
             NavigateTo(tag, args.RecommendedNavigationTransitionInfo);
+            _navigating = false;
+        }
     }
 
     private void NavigateTo(string tag,
@@ -82,6 +104,7 @@ public sealed partial class MainWindow : Window
 
         ContentFrame.Navigate(pageType, null, info);
     }
+
 
     /// <summary>
     /// Called by pages on NavigatedTo so RB/LB cycles through their focus regions.

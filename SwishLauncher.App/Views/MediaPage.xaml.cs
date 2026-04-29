@@ -2,15 +2,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using SwishLauncher.App.Helpers;
 using SwishLauncher.App.ViewModels;
-using SwishLauncher.Core.Models;
 
 namespace SwishLauncher.App.Views;
 
 public sealed partial class MediaPage : Page
 {
     public MediaViewModel ViewModel { get; }
+
+    private bool _loaded;
 
     public MediaPage()
     {
@@ -21,20 +21,33 @@ public sealed partial class MediaPage : Page
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
-        WindowHelper.Current?.SetPageFocusRegions(MediaCoverFlow);
-        ViewModel.LoadCommand.Execute(null);
+        if (!_loaded)
+        {
+            _loaded = true;
+            ViewModel.LoadCommand.Execute(null);
+        }
     }
 
     private void MediaCoverFlow_ItemActivated(object sender, object? item)
     {
-        if (item is not MediaEntry entry) return;
+        if (item is not MediaBrowserItem browserItem) return;
 
-        Frame.Navigate(
-            typeof(MediaDetailPage),
-            entry,
-            new SlideNavigationTransitionInfo
-            {
-                Effect = SlideNavigationTransitionEffect.FromRight
-            });
+        if (browserItem.IsFolder && browserItem.Group is not null)
+        {
+            // Drill into the folder — DrillInNavigationTransitionInfo gives the
+            // zoom-in feel that signals going deeper rather than switching tabs.
+            Frame.Navigate(
+                typeof(MediaFolderPage),
+                browserItem.Group,
+                new DrillInNavigationTransitionInfo());
+        }
+        else if (!browserItem.IsFolder && browserItem.Entry is not null)
+        {
+            Frame.Navigate(
+                typeof(MediaDetailPage),
+                browserItem.Entry,
+                new DrillInNavigationTransitionInfo());
+        }
     }
 }
+
