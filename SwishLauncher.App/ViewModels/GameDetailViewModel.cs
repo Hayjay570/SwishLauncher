@@ -40,7 +40,8 @@ public partial class GameDetailViewModel : BaseViewModel
         IsBusy = true;
         try
         {
-            await Windows.System.Launcher.LaunchUriAsync(new Uri(LaunchUri));
+            var uri = new Uri(LaunchUri, UriKind.Absolute);
+            await Windows.System.Launcher.LaunchUriAsync(uri);
         }
         finally
         {

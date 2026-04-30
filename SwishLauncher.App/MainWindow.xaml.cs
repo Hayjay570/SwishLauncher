@@ -58,6 +58,14 @@ public sealed partial class MainWindow : Window
     private void NavView_SelectionChanged(NavigationView sender,
         NavigationViewSelectionChangedEventArgs args)
     {
+
+        var currentType = ContentFrame.CurrentSourcePageType;
+        if (currentType == typeof(MediaPlayerPage) ||
+            currentType == typeof(MediaDetailPage) ||
+            currentType == typeof(MediaFolderPage) ||
+            currentType == typeof(GameDetailPage))
+            return;
+
         // args.IsSettingsSelected is a focus-driven change when we're mid-navigation;
         // the more reliable guard is to check if we're already on that page.
         if (_navigating) return;

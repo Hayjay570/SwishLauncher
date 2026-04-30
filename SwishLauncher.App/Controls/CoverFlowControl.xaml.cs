@@ -84,19 +84,31 @@ public sealed partial class CoverFlowControl : UserControl
 
         if (ItemsSource is null || ItemTemplate is null) return;
 
+        int index = 0;
         foreach (var item in ItemsSource)
         {
-            // ContentPresenter applies the DataTemplate and binds the item
+            var capturedIndex = index; // capture for closure
             var presenter = new ContentPresenter
             {
                 Content         = item,
                 ContentTemplate = ItemTemplate,
                 CacheMode       = new Microsoft.UI.Xaml.Media.BitmapCache(),
             };
+
+            // First tap on a side card → select it.
+            // Tap on the already-selected centre card → activate it.
+            presenter.Tapped += (_, _) =>
+            {
+                if (SelectedIndex == capturedIndex)
+                    ActivateSelected();
+                else
+                    SelectedIndex = capturedIndex;
+            };
+
             _panel.Children.Add(presenter);
+            index++;
         }
 
-        // Clamp selected index in case the new source is shorter
         _panel.SelectedIndex = Math.Clamp(SelectedIndex, 0, Math.Max(0, ItemCount - 1));
     }
 

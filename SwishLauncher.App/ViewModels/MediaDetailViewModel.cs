@@ -2,20 +2,25 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SwishLauncher.Core.Models;
 using System;
-using System.Threading.Tasks;
 
 namespace SwishLauncher.App.ViewModels;
 
 public partial class MediaDetailViewModel : BaseViewModel
 {
-    [ObservableProperty] private string    _mediaType     = string.Empty;
-    [ObservableProperty] private string    _description   = string.Empty;
-    [ObservableProperty] private double    _rating;
-    [ObservableProperty] private string    _year          = string.Empty;
-    [ObservableProperty] private string    _dateAdded     = string.Empty;
-    [ObservableProperty] private string?   _thumbnailPath;
-    [ObservableProperty] private bool      _isFavourite;
-    [ObservableProperty] private string    _filePath      = string.Empty;
+    [ObservableProperty] private string  _mediaType   = string.Empty;
+    [ObservableProperty] private string  _description = string.Empty;
+    [ObservableProperty] private double  _rating;
+    [ObservableProperty] private string  _year        = string.Empty;
+    [ObservableProperty] private string  _dateAdded   = string.Empty;
+    [ObservableProperty] private string? _thumbnailPath;
+    [ObservableProperty] private bool    _isFavourite;
+    [ObservableProperty] private string  _filePath    = string.Empty;
+
+    /// <summary>
+    /// Raised when the user presses Play. MediaDetailPage subscribes and
+    /// navigates to MediaPlayerPage, keeping navigation out of the ViewModel.
+    /// </summary>
+    public event EventHandler<string>? PlayRequested;
 
     public void LoadFrom(MediaEntry entry)
     {
@@ -29,25 +34,13 @@ public partial class MediaDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task PlayAsync()
+    private void Play()
     {
-        if (string.IsNullOrWhiteSpace(FilePath)) return;
-        IsBusy = true;
-        try
-        {
-            // FilePath is a local path like C:\Videos\movie.mp4.
-            // Launcher.LaunchUriAsync requires a proper URI, so build one via
-            // the Uri(string, UriKind) overload which handles absolute local paths,
-            // or explicitly use the file:/// scheme.
-            var uri = new Uri(FilePath, UriKind.Absolute);
-            await Windows.System.Launcher.LaunchUriAsync(uri);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        if (!string.IsNullOrWhiteSpace(FilePath))
+            PlayRequested?.Invoke(this, FilePath);
     }
 
     [RelayCommand]
     private void ToggleFavourite() => IsFavourite = !IsFavourite;
 }
+
