@@ -9,8 +9,17 @@ public partial class MediaDetailViewModel : BaseViewModel
 {
     [ObservableProperty] private string  _mediaType   = string.Empty;
     [ObservableProperty] private string  _description = string.Empty;
-    [ObservableProperty] private double  _rating;
     [ObservableProperty] private string  _year        = string.Empty;
+
+    // Manual property — avoids WinRT AOT marshalling ArgumentException on plain double
+    // in CommunityToolkit.Mvvm 8.x / WinUI 3.
+    private double _rating;
+    public double Rating
+    {
+        get => _rating;
+        set { if (_rating != value) { _rating = value; OnPropertyChanged(); } }
+    }
+
     [ObservableProperty] private string  _dateAdded   = string.Empty;
     [ObservableProperty] private string? _thumbnailPath;
     [ObservableProperty] private bool    _isFavourite;

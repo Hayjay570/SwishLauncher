@@ -18,7 +18,23 @@
             FallbackColor="#1A1A1A"/>
     </Page.Background>
 
-    <Grid ColumnDefinitions="*,*" Padding="48,36">
+    <Grid RowDefinitions="Auto,*" Padding="0">
+
+        <!-- Back button row -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12"
+                    Padding="48,32,48,0" VerticalAlignment="Center">
+            <Button
+                x:Name="BackButton"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                Padding="8"
+                VerticalAlignment="Center"
+                Click="BackButton_Click">
+                <FontIcon Glyph="&#xE76B;" FontSize="18"/>
+            </Button>
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" Padding="48,24,48,36">
 
         <!-- ── LEFT: Cover art ─────────────────────────────────────────── -->
         <Grid Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -31,7 +47,8 @@
                 </Border.Shadow>
                 <Grid>
                     <Image
-                        Source="{x:Bind ViewModel.CoverArtPath, Mode=OneWay}"
+                        Source="{x:Bind ViewModel.CoverArtPath, Mode=OneWay,
+                            Converter={StaticResource PathToImageSourceConverter}}"
                         Stretch="UniformToFill"/>
                     <FontIcon
                         Glyph="&#xE7FC;"
@@ -140,6 +157,8 @@
 
                 </StackPanel>
             </Border>
+        </Grid>
+
         </Grid>
 
     </Grid>

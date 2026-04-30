@@ -53,7 +53,6 @@ public sealed partial class MediaFolderPage : Page
 
         if (browserItem.IsFolder && browserItem.Group is not null)
         {
-            // Drill deeper into a sub-folder — another MediaFolderPage instance
             Frame.Navigate(
                 typeof(MediaFolderPage),
                 browserItem.Group,
@@ -64,7 +63,8 @@ public sealed partial class MediaFolderPage : Page
             Frame.Navigate(
                 typeof(MediaDetailPage),
                 browserItem.Entry,
-                new DrillInNavigationTransitionInfo());
+                new SlideNavigationTransitionInfo
+                    { Effect = SlideNavigationTransitionEffect.FromRight });
         }
     }
 

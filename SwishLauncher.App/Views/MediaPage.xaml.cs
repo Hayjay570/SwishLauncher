@@ -34,8 +34,6 @@ public sealed partial class MediaPage : Page
 
         if (browserItem.IsFolder && browserItem.Group is not null)
         {
-            // Drill into the folder — DrillInNavigationTransitionInfo gives the
-            // zoom-in feel that signals going deeper rather than switching tabs.
             Frame.Navigate(
                 typeof(MediaFolderPage),
                 browserItem.Group,
@@ -46,7 +44,8 @@ public sealed partial class MediaPage : Page
             Frame.Navigate(
                 typeof(MediaDetailPage),
                 browserItem.Entry,
-                new DrillInNavigationTransitionInfo());
+                new SlideNavigationTransitionInfo
+                    { Effect = SlideNavigationTransitionEffect.FromRight });
         }
     }
 }

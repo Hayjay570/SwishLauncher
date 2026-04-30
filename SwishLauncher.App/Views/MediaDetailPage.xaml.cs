@@ -33,7 +33,15 @@ public sealed partial class MediaDetailPage : Page
         Frame.Navigate(
             typeof(MediaPlayerPage),
             filePath,
-            new DrillInNavigationTransitionInfo());
+            new SlideNavigationTransitionInfo
+                { Effect = SlideNavigationTransitionEffect.FromRight });
+    }
+
+    private void BackButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (Frame.CanGoBack)
+            Frame.GoBack(new SlideNavigationTransitionInfo
+                { Effect = SlideNavigationTransitionEffect.FromLeft });
     }
 }
 

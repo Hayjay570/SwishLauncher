@@ -24,4 +24,11 @@ public sealed partial class GameDetailPage : Page
         if (e.Parameter is GameEntry entry)
             ViewModel.LoadFrom(entry);
     }
+
+    private void BackButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (Frame.CanGoBack)
+            Frame.GoBack(new Microsoft.UI.Xaml.Media.Animation.SlideNavigationTransitionInfo
+                { Effect = Microsoft.UI.Xaml.Media.Animation.SlideNavigationTransitionEffect.FromLeft });
+    }
 }

@@ -33,6 +33,9 @@ public sealed partial class MainWindow : Window
         NavigationViewControl.SelectionChanged += NavView_SelectionChanged;
         NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
 
+        // Keep the nav bar in sync when GoBack() lands on a top-level page
+        ContentFrame.Navigated += ContentFrame_Navigated;
+
         // Escape exits full-screen
         if (Content is FrameworkElement root)
         {
@@ -53,41 +56,90 @@ public sealed partial class MainWindow : Window
             AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen));
     }
 
-    private bool _navigating;
+    // The tab the user actually intends to be on. Kept separate from the
+    // NavigationView's SelectedItem so we can restore it after GoBack() causes
+    // SelectionChanged to fire spuriously (SelectionFollowsFocus side-effect).
+    private string _intendedTag = "Home";
+    private bool _suppressSelectionChanged;
 
     private void NavView_SelectionChanged(NavigationView sender,
         NavigationViewSelectionChangedEventArgs args)
     {
+        if (_suppressSelectionChanged) return;
 
-        var currentType = ContentFrame.CurrentSourcePageType;
-        if (currentType == typeof(MediaPlayerPage) ||
-            currentType == typeof(MediaDetailPage) ||
-            currentType == typeof(MediaFolderPage) ||
-            currentType == typeof(GameDetailPage))
-            return;
+        if (args.SelectedItem is not NavigationViewItem { Tag: string tag }) return;
 
-        // args.IsSettingsSelected is a focus-driven change when we're mid-navigation;
-        // the more reliable guard is to check if we're already on that page.
-        if (_navigating) return;
-
-        if (args.SelectedItem is NavigationViewItem { Tag: string tag })
+        var pageType = tag switch
         {
-            var pageType = tag switch
-            {
-                "Home" => typeof(HomePage),
-                "Games" => typeof(GamesPage),
-                "Media" => typeof(MediaPage),
-                "Settings" => typeof(SettingsPage),
-                _ => typeof(HomePage)
-            };
+            "Home"     => typeof(HomePage),
+            "Games"    => typeof(GamesPage),
+            "Media"    => typeof(MediaPage),
+            "Settings" => typeof(SettingsPage),
+            _          => typeof(HomePage)
+        };
 
-            // Don't navigate if focus drifted to the already-active tab
-            if (ContentFrame.CurrentSourcePageType == pageType) return;
+        // If focus drifted while on a sub-page, the nav bar selection may have
+        // changed — restore the intended item without navigating.
+        var currentType = ContentFrame.CurrentSourcePageType;
+        bool onSubPage = currentType == typeof(MediaPlayerPage) ||
+                         currentType == typeof(MediaDetailPage) ||
+                         currentType == typeof(MediaFolderPage) ||
+                         currentType == typeof(GameDetailPage);
 
-            _navigating = true;
-            NavigateTo(tag, args.RecommendedNavigationTransitionInfo);
-            _navigating = false;
+        if (onSubPage)
+        {
+            RestoreNavSelection();
+            return;
         }
+
+        // Genuine user-initiated tab change
+        if (ContentFrame.CurrentSourcePageType == pageType) return;
+
+        _intendedTag = tag;
+        NavigateTo(tag, args.RecommendedNavigationTransitionInfo);
+    }
+
+    /// <summary>
+    /// Restores the NavigationView's visual selection to match _intendedTag
+    /// without triggering another SelectionChanged.
+    /// </summary>
+    private void RestoreNavSelection()
+    {
+        _suppressSelectionChanged = true;
+        foreach (var obj in NavigationViewControl.MenuItems)
+        {
+            if (obj is NavigationViewItem nvi && nvi.Tag is string t && t == _intendedTag)
+            {
+                NavigationViewControl.SelectedItem = nvi;
+                break;
+            }
+        }
+        _suppressSelectionChanged = false;
+    }
+
+    /// <summary>
+    /// After every navigation, update _intendedTag to reflect which top-level
+    /// tab owns the current page. This covers both direct tab navigations and
+    /// GoBack() returning from a sub-page, ensuring RestoreNavSelection() always
+    /// snaps to the correct tab even if SelectionChanged fires mid-transition.
+    /// </summary>
+    private void ContentFrame_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+    {
+        var tag = e.SourcePageType switch
+        {
+            var t when t == typeof(HomePage)       => "Home",
+            var t when t == typeof(GamesPage)      => "Games",
+            var t when t == typeof(GameDetailPage) => "Games",
+            var t when t == typeof(MediaPage)      => "Media",
+            var t when t == typeof(MediaFolderPage)=> "Media",
+            var t when t == typeof(MediaDetailPage)=> "Media",
+            var t when t == typeof(MediaPlayerPage)=> "Media",
+            var t when t == typeof(SettingsPage)   => "Settings",
+            _                                      => (string?)null
+        };
+
+        if (tag is not null)
+            _intendedTag = tag;
     }
 
     private void NavigateTo(string tag,

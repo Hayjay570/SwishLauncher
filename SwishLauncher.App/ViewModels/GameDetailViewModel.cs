@@ -10,8 +10,17 @@ public partial class GameDetailViewModel : BaseViewModel
 {
     [ObservableProperty] private string  _platform       = string.Empty;
     [ObservableProperty] private string  _description    = string.Empty;
-    [ObservableProperty] private double  _rating;
     [ObservableProperty] private string  _lastPlayed     = "Never";
+
+    // double? avoids the WinRT AOT marshalling ArgumentException that
+    // [ObservableProperty] on a plain double triggers in WinUI 3 / CommunityToolkit 8.x.
+    private double _rating;
+    public double Rating
+    {
+        get => _rating;
+        set { if (_rating != value) { _rating = value; OnPropertyChanged(); } }
+    }
+
     [ObservableProperty] private string  _playtime       = "0 min";
     [ObservableProperty] private string? _coverArtPath;
     [ObservableProperty] private bool    _isFavourite;
