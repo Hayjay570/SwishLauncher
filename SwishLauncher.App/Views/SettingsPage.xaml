@@ -3,6 +3,7 @@
     x:Class="SwishLauncher.App.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:SwishLauncher.App.ViewModels"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -11,13 +12,13 @@
         x:Name="SettingsScroller"
         UseSystemFocusVisuals="True">
 
-        <StackPanel Padding="48,32" Spacing="24" MaxWidth="640">
+        <StackPanel Padding="48,32" Spacing="32" MaxWidth="640">
 
             <TextBlock
                 Text="{x:Bind ViewModel.Title, Mode=OneWay}"
                 Style="{ThemeResource TitleTextBlockStyle}"/>
 
-            <!-- Appearance -->
+            <!-- ── Appearance ─────────────────────────────────────────── -->
             <StackPanel Spacing="12">
                 <TextBlock Text="Appearance" Style="{ThemeResource SubtitleTextBlockStyle}"/>
 
@@ -47,10 +48,54 @@
                     IsOn="{x:Bind ViewModel.UseHighContrast, Mode=TwoWay}"/>
             </StackPanel>
 
-            <!-- About -->
+            <!-- ── Store sources ──────────────────────────────────────── -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="Game Stores" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                <TextBlock
+                    Text="Enable or disable game library sources. Changes take effect on the next scan."
+                    Style="{ThemeResource BodyTextBlockStyle}"
+                    Opacity="0.6"
+                    TextWrapping="Wrap"/>
+
+                <ToggleSwitch
+                    Header="Steam"
+                    IsOn="{x:Bind ViewModel.IsSteamEnabled, Mode=TwoWay}"/>
+
+                <ToggleSwitch
+                    Header="Xbox / Microsoft Store"
+                    IsOn="{x:Bind ViewModel.IsXboxEnabled, Mode=TwoWay}"/>
+
+                <ToggleSwitch
+                    Header="Manually added games"
+                    IsOn="{x:Bind ViewModel.IsManualEnabled, Mode=TwoWay}"/>
+            </StackPanel>
+
+            <!-- ── Streaming services ─────────────────────────────────── -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="Streaming Services" Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                <TextBlock
+                    Text="Choose which services appear on the Streaming page."
+                    Style="{ThemeResource BodyTextBlockStyle}"
+                    Opacity="0.6"
+                    TextWrapping="Wrap"/>
+
+                <ItemsControl ItemsSource="{x:Bind ViewModel.StreamingServices, Mode=OneWay}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:StreamingServiceItem">
+                            <ToggleSwitch
+                                Header="{x:Bind Name}"
+                                IsOn="{x:Bind IsEnabled, Mode=TwoWay}"
+                                Margin="0,0,0,4"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <!-- ── About ──────────────────────────────────────────────── -->
             <StackPanel Spacing="8">
                 <TextBlock Text="About" Style="{ThemeResource SubtitleTextBlockStyle}"/>
-                <TextBlock Text="Unified launcher for Windows" Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.7"/>
+                <TextBlock Text="SwishLauncher — unified media center and game launcher for Windows."
+                           Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.7" TextWrapping="Wrap"/>
             </StackPanel>
 
         </StackPanel>
