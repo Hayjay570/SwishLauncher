@@ -30,14 +30,39 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        // EnsureCreated is quick for an empty DB; for migrations swap to Migrate()
         using var scope = Services.CreateScope();
-        scope.ServiceProvider.GetRequiredService<SwishDbContext>()
-            .Database.EnsureCreated();
+        var db = scope.ServiceProvider.GetRequiredService<SwishDbContext>();
+
+        // Create schema if the DB is brand-new.
+        db.Database.EnsureCreated();
+
+        // ── Manual column migrations ───────────────────────────────────────
+        // EnsureCreated is idempotent: it won't add new columns to existing
+        // tables. Use TryAddColumn for every column added after the initial
+        // schema — it silently swallows the "duplicate column" error from SQLite.
+        TryAddColumn(db, "Games", "IsFavourite", "INTEGER NOT NULL DEFAULT 0");
 
         _window = new MainWindow();
         ActiveWindow = _window;
         _window.Activate();
+    }
+
+    /// <summary>
+    /// Runs ALTER TABLE … ADD COLUMN and silently ignores the error SQLite
+    /// raises when the column already exists. Safe to call on every launch.
+    /// </summary>
+    private static void TryAddColumn(SwishDbContext db, string table,
+        string column, string columnDef)
+    {
+        try
+        {
+            db.Database.ExecuteSqlRaw(
+                $"ALTER TABLE {table} ADD COLUMN {column} {columnDef}");
+        }
+        catch
+        {
+            // Column already exists — nothing to do.
+        }
     }
 
     private static ServiceProvider BuildServiceProvider()

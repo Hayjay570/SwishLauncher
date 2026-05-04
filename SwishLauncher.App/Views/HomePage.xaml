@@ -7,54 +7,254 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,*,Auto" Padding="48,32">
+    <Grid>
 
-        <!-- Hero / Greeting -->
-        <StackPanel Grid.Row="0" Spacing="8">
-            <TextBlock
-                Text="{x:Bind ViewModel.Greeting, Mode=OneWay}"
-                Style="{ThemeResource TitleLargeTextBlockStyle}"/>
-            <TextBlock
-                Text="{x:Bind ViewModel.FeaturedTitle, Mode=OneWay}"
-                Style="{ThemeResource SubtitleTextBlockStyle}"
-                Opacity="0.7"/>
-        </StackPanel>
+        <!-- Loading overlay -->
+        <ProgressRing
+            IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
+            Width="40" Height="40"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay,
+                Converter={StaticResource BoolToVisibilityConverter}}"/>
 
-        <!-- Main content area (placeholder) -->
-        <Border
-            x:Name="ContentRegion"
-            Grid.Row="1"
-            Margin="0,24"
-            CornerRadius="12"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            UseSystemFocusVisuals="True"
-            IsTabStop="True">
-            <TextBlock
-                Text="Featured content will appear here"
-                Style="{ThemeResource BodyTextBlockStyle}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Opacity="0.5"/>
-        </Border>
+        <ScrollViewer
+            VerticalScrollBarVisibility="Hidden"
+            HorizontalScrollBarVisibility="Disabled"
+            Padding="0,0,0,32"
+            Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay,
+                Converter={StaticResource BoolNegationToVisibilityConverter}}">
 
-        <!-- Footer / Actions -->
-        <StackPanel
-            x:Name="ActionsRegion"
-            Grid.Row="2"
-            Orientation="Horizontal"
-            Spacing="12"
-            UseSystemFocusVisuals="True">
+            <StackPanel Spacing="0">
 
-            <Button
-                Content="Refresh"
-                Command="{x:Bind ViewModel.RefreshCommand}"
-                IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"
-                Style="{ThemeResource AccentButtonStyle}"/>
+                <!-- ── SECTION: Featured ──────────────────────────────── -->
+                <StackPanel
+                    x:Name="FeaturedSection"
+                    Spacing="16"
+                    Padding="48,36,48,0"
+                    Visibility="{x:Bind ViewModel.FeaturedGames.Count, Mode=OneWay,
+                        Converter={StaticResource NonZeroToVisibilityConverter}}">
 
-            <ProgressRing
-                IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
-                Width="24" Height="24"/>
-        </StackPanel>
+                    <TextBlock
+                        Text="FEATURED"
+                        Style="{ThemeResource CaptionTextBlockStyle}"
+                        Opacity="0.6"
+                        CharacterSpacing="150"/>
 
+                    <ScrollViewer
+                        HorizontalScrollBarVisibility="Hidden"
+                        VerticalScrollBarVisibility="Disabled"
+                        HorizontalScrollMode="Enabled"
+                        VerticalScrollMode="Disabled">
+                        <ItemsRepeater
+                            x:Name="FeaturedRepeater"
+                            ItemsSource="{x:Bind ViewModel.FeaturedGames, Mode=OneWay}">
+                            <ItemsRepeater.Layout>
+                                <StackLayout Orientation="Horizontal" Spacing="16"/>
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate>
+                                    <Button
+                                        Width="200" Height="280"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="Transparent"
+                                        Click="GameCard_Click">
+                                        <Border CornerRadius="12" Width="200" Height="280">
+                                            <Border.Shadow><ThemeShadow/></Border.Shadow>
+                                            <Grid>
+                                                <Border
+                                                    CornerRadius="12"
+                                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+                                                <Image
+                                                    Source="{Binding CoverArtPath,
+                                                        Converter={StaticResource PathToImageSourceConverter}}"
+                                                    Stretch="UniformToFill"/>
+                                                <Border
+                                                    VerticalAlignment="Bottom"
+                                                    CornerRadius="0,0,12,12"
+                                                    Padding="12,10">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="Transparent" Offset="0"/>
+                                                            <GradientStop Color="#EE000000"   Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                    <TextBlock
+                                                        Text="{Binding Title}"
+                                                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                                        Foreground="White"
+                                                        TextTrimming="CharacterEllipsis"
+                                                        MaxLines="2"
+                                                        TextWrapping="Wrap"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </ScrollViewer>
+                </StackPanel>
+
+                <!-- ── SECTION: Recently Played ───────────────────────── -->
+                <StackPanel
+                    x:Name="RecentSection"
+                    Spacing="16"
+                    Padding="48,36,48,0"
+                    Visibility="{x:Bind ViewModel.RecentlyPlayed.Count, Mode=OneWay,
+                        Converter={StaticResource NonZeroToVisibilityConverter}}">
+
+                    <TextBlock
+                        Text="RECENTLY PLAYED"
+                        Style="{ThemeResource CaptionTextBlockStyle}"
+                        Opacity="0.6"
+                        CharacterSpacing="150"/>
+
+                    <ScrollViewer
+                        HorizontalScrollBarVisibility="Hidden"
+                        VerticalScrollBarVisibility="Disabled"
+                        HorizontalScrollMode="Enabled"
+                        VerticalScrollMode="Disabled">
+                        <ItemsRepeater
+                            x:Name="RecentRepeater"
+                            ItemsSource="{x:Bind ViewModel.RecentlyPlayed, Mode=OneWay}">
+                            <ItemsRepeater.Layout>
+                                <StackLayout Orientation="Horizontal" Spacing="12"/>
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate>
+                                    <Button
+                                        Width="160" Height="220"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="Transparent"
+                                        Click="GameCard_Click">
+                                        <Border CornerRadius="10" Width="160" Height="220">
+                                            <Border.Shadow><ThemeShadow/></Border.Shadow>
+                                            <Grid>
+                                                <Border
+                                                    CornerRadius="10"
+                                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+                                                <Image
+                                                    Source="{Binding CoverArtPath,
+                                                        Converter={StaticResource PathToImageSourceConverter}}"
+                                                    Stretch="UniformToFill"/>
+                                                <Border
+                                                    VerticalAlignment="Bottom"
+                                                    CornerRadius="0,0,10,10"
+                                                    Padding="10,8">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="Transparent" Offset="0"/>
+                                                            <GradientStop Color="#DD000000"   Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                    <TextBlock
+                                                        Text="{Binding Title}"
+                                                        Style="{ThemeResource CaptionTextBlockStyle}"
+                                                        Foreground="White"
+                                                        TextTrimming="CharacterEllipsis"
+                                                        MaxLines="1"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </ScrollViewer>
+                </StackPanel>
+
+                <!-- ── SECTION: Favourites ────────────────────────────── -->
+                <StackPanel
+                    x:Name="FavouritesSection"
+                    Spacing="16"
+                    Padding="48,36,48,0"
+                    Visibility="{x:Bind ViewModel.Favourites.Count, Mode=OneWay,
+                        Converter={StaticResource NonZeroToVisibilityConverter}}">
+
+                    <TextBlock
+                        Text="FAVOURITES"
+                        Style="{ThemeResource CaptionTextBlockStyle}"
+                        Opacity="0.6"
+                        CharacterSpacing="150"/>
+
+                    <ItemsRepeater
+                        x:Name="FavouritesRepeater"
+                        ItemsSource="{x:Bind ViewModel.Favourites, Mode=OneWay}">
+                        <ItemsRepeater.Layout>
+                            <UniformGridLayout
+                                MinItemWidth="140"
+                                MinItemHeight="196"
+                                MinColumnSpacing="12"
+                                MinRowSpacing="12"
+                                ItemsStretch="Fill"/>
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate>
+                                <Button
+                                    Padding="0"
+                                    Background="Transparent"
+                                    BorderBrush="Transparent"
+                                    HorizontalAlignment="Stretch"
+                                    Click="GameCard_Click">
+                                    <Border CornerRadius="8" Height="196">
+                                        <Border.Shadow><ThemeShadow/></Border.Shadow>
+                                        <Grid>
+                                            <Border
+                                                CornerRadius="8"
+                                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+                                            <Image
+                                                Source="{Binding CoverArtPath,
+                                                    Converter={StaticResource PathToImageSourceConverter}}"
+                                                Stretch="UniformToFill"/>
+                                            <Border
+                                                VerticalAlignment="Bottom"
+                                                CornerRadius="0,0,8,8"
+                                                Padding="8,6">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                        <GradientStop Color="Transparent" Offset="0"/>
+                                                        <GradientStop Color="#CC000000"   Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <TextBlock
+                                                    Text="{Binding Title}"
+                                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                                    Foreground="White"
+                                                    TextTrimming="CharacterEllipsis"
+                                                    MaxLines="1"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </StackPanel>
+
+                <!-- ── Empty state ────────────────────────────────────── -->
+                <StackPanel
+                    x:Name="EmptyState"
+                    HorizontalAlignment="Center"
+                    Spacing="12"
+                    Margin="0,120,0,0">
+                    <FontIcon Glyph="&#xE80F;" FontSize="48" Opacity="0.3"
+                              HorizontalAlignment="Center"/>
+                    <TextBlock
+                        Text="Your library is empty"
+                        Style="{ThemeResource SubtitleTextBlockStyle}"
+                        HorizontalAlignment="Center"
+                        Opacity="0.5"/>
+                    <TextBlock
+                        Text="Head to the Games tab and hit Scan to get started."
+                        Style="{ThemeResource BodyTextBlockStyle}"
+                        HorizontalAlignment="Center"
+                        Opacity="0.4"/>
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>

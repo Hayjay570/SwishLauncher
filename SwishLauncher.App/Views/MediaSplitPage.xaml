@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="SwishLauncher.App.Views.MediaSplitPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+        Open-book split: two large cards angled inward on Y-axis.
+        Transform3D (CompositeTransform3D) is set and animated entirely in
+        code-behind — XAML stays projection-free to avoid the PlaneProjection
+        WPF/UWP type that doesn't exist in WinUI 3.
+    -->
+    <Grid>
+
+        <!-- Subtitle hint -->
+        <TextBlock
+            Text="CHOOSE YOUR EXPERIENCE"
+            Style="{ThemeResource CaptionTextBlockStyle}"
+            CharacterSpacing="150"
+            Opacity="0.5"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            Margin="0,40,0,0"/>
+
+        <!-- Card pair — centred on screen -->
+        <Grid
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT card: Local Files -->
+            <Border
+                x:Name="LocalCard"
+                Grid.Column="0"
+                Width="400" Height="560"
+                CornerRadius="16"
+                CacheMode="BitmapCache">
+                <Border.Shadow><ThemeShadow/></Border.Shadow>
+                <Button
+                    x:Name="LocalCardButton"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Padding="0"
+                    Click="LocalCard_Click">
+                    <Grid Width="400" Height="560">
+                        <Border CornerRadius="16">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#1A4A8A" Offset="0"/>
+                                    <GradientStop Color="#0A1A3A" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <FontIcon
+                            Glyph="&#xED43;"
+                            FontSize="96"
+                            Foreground="#60FFFFFF"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="0,0,0,60"/>
+                        <StackPanel
+                            VerticalAlignment="Bottom"
+                            HorizontalAlignment="Center"
+                            Spacing="8"
+                            Margin="0,0,0,48">
+                            <TextBlock
+                                Text="Local Files"
+                                Style="{ThemeResource TitleTextBlockStyle}"
+                                HorizontalAlignment="Center"
+                                Foreground="White"/>
+                            <TextBlock
+                                Text="Browse your videos and music"
+                                Style="{ThemeResource BodyTextBlockStyle}"
+                                HorizontalAlignment="Center"
+                                Foreground="#99FFFFFF"/>
+                        </StackPanel>
+                    </Grid>
+                </Button>
+            </Border>
+
+            <!-- RIGHT card: Streaming Services -->
+            <Border
+                x:Name="StreamingCard"
+                Grid.Column="2"
+                Width="400" Height="560"
+                CornerRadius="16"
+                CacheMode="BitmapCache">
+                <Border.Shadow><ThemeShadow/></Border.Shadow>
+                <Button
+                    x:Name="StreamingCardButton"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Padding="0"
+                    Click="StreamingCard_Click">
+                    <Grid Width="400" Height="560">
+                        <Border CornerRadius="16">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#6A1A1A" Offset="0"/>
+                                    <GradientStop Color="#1A0808" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <FontIcon
+                            Glyph="&#xE8B2;"
+                            FontSize="96"
+                            Foreground="#60FFFFFF"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="0,0,0,60"/>
+                        <StackPanel
+                            VerticalAlignment="Bottom"
+                            HorizontalAlignment="Center"
+                            Spacing="8"
+                            Margin="0,0,0,48">
+                            <TextBlock
+                                Text="Streaming Services"
+                                Style="{ThemeResource TitleTextBlockStyle}"
+                                HorizontalAlignment="Center"
+                                Foreground="White"/>
+                            <TextBlock
+                                Text="Netflix, Prime, Disney+ and more"
+                                Style="{ThemeResource BodyTextBlockStyle}"
+                                HorizontalAlignment="Center"
+                                Foreground="#99FFFFFF"/>
+                        </StackPanel>
+                    </Grid>
+                </Button>
+            </Border>
+
+        </Grid>
+    </Grid>
+</Page>

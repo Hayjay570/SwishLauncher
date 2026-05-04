@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="SwishLauncher.App.Views.MediaBrowserPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:SwishLauncher.App.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid RowDefinitions="Auto,*" Padding="0,32,0,0">
+
+        <!-- Title row — matches GamesPage layout exactly -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="16"
+                    Padding="48,0" VerticalAlignment="Center">
+            <Button
+                x:Name="BackButton"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                VerticalAlignment="Center"
+                ToolTipService.ToolTip="Back to Media"
+                Click="BackButton_Click">
+                <FontIcon Glyph="&#xE72B;" FontSize="16"/>
+            </Button>
+            <TextBlock
+                Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+                Style="{ThemeResource TitleTextBlockStyle}"/>
+            <ProgressRing
+                IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
+                Width="20" Height="20" VerticalAlignment="Center"/>
+            <Button
+                Command="{x:Bind ViewModel.ScanCommand}"
+                IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay,
+                    Converter={StaticResource BoolNegationConverter}}"
+                ToolTipService.ToolTip="Scan local media folders"
+                Style="{ThemeResource AccentButtonStyle}"
+                VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE72C;" FontSize="14"/>
+                    <TextBlock Text="Scan"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+
+        <!-- Root CoverFlow — folders and loose files mixed -->
+        <controls:CoverFlowControl
+            x:Name="MediaCoverFlow"
+            Grid.Row="1"
+            VerticalAlignment="Stretch"
+            MinHeight="400"
+            ItemsSource="{x:Bind ViewModel.RootItems, Mode=OneWay}"
+            SelectedIndex="{x:Bind ViewModel.SelectedIndex, Mode=TwoWay}"
+            ItemActivated="MediaCoverFlow_ItemActivated">
+
+            <controls:CoverFlowControl.ItemTemplate>
+                <!--
+                    No x:DataType — consumed by CoverFlowControl (non-ItemsControl).
+                    Use {Binding} throughout. DataContext is MediaBrowserItem.
+                -->
+                <DataTemplate>
+                    <Grid Width="220" Height="300">
+
+                        <!-- FOLDER CARD -->
+                        <Border
+                            CornerRadius="12"
+                            CacheMode="BitmapCache"
+                            Visibility="{Binding IsFolder,
+                                Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Border.Shadow><ThemeShadow/></Border.Shadow>
+                            <Grid>
+                                <Border
+                                    CornerRadius="12"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+                                <FontIcon
+                                    Glyph="&#xED43;"
+                                    FontSize="110"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                    Margin="0,0,0,40"/>
+                                <Border
+                                    VerticalAlignment="Bottom"
+                                    CornerRadius="0,0,12,12"
+                                    Padding="12,10">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="Transparent" Offset="0"/>
+                                            <GradientStop Color="#DD000000"   Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <TextBlock
+                                        Text="{Binding Label}"
+                                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                        TextTrimming="CharacterEllipsis"
+                                        MaxLines="2"
+                                        TextWrapping="Wrap"
+                                        Foreground="White"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- MEDIA ITEM CARD -->
+                        <Border
+                            CornerRadius="12"
+                            CacheMode="BitmapCache"
+                            Visibility="{Binding IsFolder,
+                                Converter={StaticResource BoolNegationToVisibilityConverter}}">
+                            <Border.Shadow><ThemeShadow/></Border.Shadow>
+                            <Grid>
+                                <Border
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    CornerRadius="12"/>
+                                <Border Width="220" Height="300" CornerRadius="12">
+                                    <Image
+                                        Source="{Binding Entry.ThumbnailPath,
+                                            Converter={StaticResource PathToImageSourceConverter}}"
+                                        Stretch="UniformToFill"/>
+                                </Border>
+                                <FontIcon
+                                    Glyph="&#xE8B2;"
+                                    FontSize="60"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Opacity="0.25"/>
+                                <Border
+                                    VerticalAlignment="Bottom"
+                                    CornerRadius="0,0,12,12"
+                                    Padding="12,8">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="Transparent" Offset="0"/>
+                                            <GradientStop Color="#CC000000"   Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <TextBlock
+                                        Text="{Binding Label}"
+                                        Style="{ThemeResource CaptionTextBlockStyle}"
+                                        TextTrimming="CharacterEllipsis"
+                                        MaxLines="1"
+                                        Foreground="White"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                    </Grid>
+                </DataTemplate>
+            </controls:CoverFlowControl.ItemTemplate>
+
+        </controls:CoverFlowControl>
+
+        <!-- Empty state -->
+        <TextBlock
+            Grid.Row="1"
+            Text="No media found. Hit Scan to search your folders."
+            Style="{ThemeResource BodyTextBlockStyle}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Opacity="0.5"
+            Visibility="{x:Bind ViewModel.RootItems.Count, Mode=OneWay,
+                Converter={StaticResource ZeroToVisibleConverter}}"/>
+
+    </Grid>
+</Page>

@@ -1,8 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using SwishLauncher.App.Helpers;
 using SwishLauncher.App.ViewModels;
+using SwishLauncher.Core.Models;
 
 namespace SwishLauncher.App.Views;
 
@@ -19,12 +21,22 @@ public sealed partial class HomePage : Page
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        // Reload data each time the Home tab is entered so new scans are reflected.
+        ViewModel.LoadCommand.Execute(null);
+    }
 
-        // Register focus regions for RB/LB gamepad cycling.
-        // Order: content area first, then action buttons.
-        WindowHelper.Current?.SetPageFocusRegions(ContentRegion, ActionsRegion);
-
-        // Kick off an initial data load each time the page is shown.
-        ViewModel.RefreshCommand.Execute(null);
+    // ── Card click ─────────────────────────────────────────────────────────
+    // All three section templates share this handler. The Button's DataContext
+    // is the GameEntry bound by ItemsRepeater.
+    private void GameCard_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { DataContext: GameEntry entry })
+        {
+            Frame.Navigate(
+                typeof(GameDetailPage),
+                entry,
+                new SlideNavigationTransitionInfo
+                    { Effect = SlideNavigationTransitionEffect.FromRight });
+        }
     }
 }

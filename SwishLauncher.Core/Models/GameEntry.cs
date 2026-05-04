@@ -17,5 +17,6 @@ public class GameEntry
     public double? Rating { get; set; }
     public DateTime? LastPlayed { get; set; }
     public int PlaytimeMinutes { get; set; }
+    public bool IsFavourite { get; set; }
     public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 }

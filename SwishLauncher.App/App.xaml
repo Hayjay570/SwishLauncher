@@ -20,6 +20,7 @@
             <converters:PathToImageSourceConverter x:Key="PathToImageSourceConverter"/>
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <converters:BoolNegationToVisibilityConverter x:Key="BoolNegationToVisibilityConverter"/>
+            <converters:NonZeroToVisibilityConverter x:Key="NonZeroToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

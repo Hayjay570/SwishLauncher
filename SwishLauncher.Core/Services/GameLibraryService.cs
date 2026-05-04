@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -124,4 +124,28 @@ public class GameLibraryService(
                 .ExecuteDeleteAsync(ct);
         // ─────────────────────────────────────────────────────────────────────
     }
+
+    // ── Home screen queries ────────────────────────────────────────────────
+
+    /// <summary>Top 5 most recently added games (for the Featured strip).</summary>
+    public Task<List<GameEntry>> GetFeaturedAsync(CancellationToken ct = default)
+        => db.Games.AsNoTracking()
+              .OrderByDescending(g => g.DateAdded)
+              .Take(5)
+              .ToListAsync(ct);
+
+    /// <summary>Games with a LastPlayed date, ordered most-recent first.</summary>
+    public Task<List<GameEntry>> GetRecentlyPlayedAsync(CancellationToken ct = default)
+        => db.Games.AsNoTracking()
+              .Where(g => g.LastPlayed != null)
+              .OrderByDescending(g => g.LastPlayed)
+              .ToListAsync(ct);
+
+    /// <summary>Favourited games ordered by total playtime descending.</summary>
+    public Task<List<GameEntry>> GetFavouritesAsync(CancellationToken ct = default)
+        => db.Games.AsNoTracking()
+              .Where(g => g.IsFavourite)
+              .OrderByDescending(g => g.PlaytimeMinutes)
+              .ToListAsync(ct);
+
 }

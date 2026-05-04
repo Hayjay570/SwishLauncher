@@ -73,7 +73,7 @@ public sealed partial class MainWindow : Window
         {
             "Home"     => typeof(HomePage),
             "Games"    => typeof(GamesPage),
-            "Media"    => typeof(MediaPage),
+            "Media"    => typeof(MediaSplitPage),
             "Settings" => typeof(SettingsPage),
             _          => typeof(HomePage)
         };
@@ -84,6 +84,8 @@ public sealed partial class MainWindow : Window
         bool onSubPage = currentType == typeof(MediaPlayerPage) ||
                          currentType == typeof(MediaDetailPage) ||
                          currentType == typeof(MediaFolderPage) ||
+                         currentType == typeof(MediaBrowserPage) ||
+                         currentType == typeof(StreamingPlaceholderPage) ||
                          currentType == typeof(GameDetailPage);
 
         if (onSubPage)
@@ -130,7 +132,9 @@ public sealed partial class MainWindow : Window
             var t when t == typeof(HomePage)       => "Home",
             var t when t == typeof(GamesPage)      => "Games",
             var t when t == typeof(GameDetailPage) => "Games",
-            var t when t == typeof(MediaPage)      => "Media",
+            var t when t == typeof(MediaSplitPage)     => "Media",
+            var t when t == typeof(MediaBrowserPage)   => "Media",
+            var t when t == typeof(MediaPage)          => "Media",
             var t when t == typeof(MediaFolderPage)=> "Media",
             var t when t == typeof(MediaDetailPage)=> "Media",
             var t when t == typeof(MediaPlayerPage)=> "Media",
@@ -149,7 +153,7 @@ public sealed partial class MainWindow : Window
         {
             "Home"     => typeof(HomePage),
             "Games"    => typeof(GamesPage),
-            "Media"    => typeof(MediaPage),
+            "Media"    => typeof(MediaSplitPage),
             "Settings" => typeof(SettingsPage),
             _          => typeof(HomePage)
         };
