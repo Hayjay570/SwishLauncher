@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using SwishLauncher.App.Helpers;
 using SwishLauncher.App.ViewModels;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -43,6 +44,7 @@ public sealed partial class StreamingPlaceholderPage : Page, INotifyPropertyChan
     {
         base.OnNavigatedTo(e);
         RefreshServices();
+        WindowHelper.Current?.SetPageFocusRegions(StreamingCoverFlow);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -67,7 +69,9 @@ public sealed partial class StreamingPlaceholderPage : Page, INotifyPropertyChan
 
     private void Back_Click(object sender, RoutedEventArgs e)
     {
-        if (Frame.CanGoBack) Frame.GoBack();
+        if (Frame.CanGoBack)
+            Frame.GoBack(new Microsoft.UI.Xaml.Media.Animation.SlideNavigationTransitionInfo
+                { Effect = Microsoft.UI.Xaml.Media.Animation.SlideNavigationTransitionEffect.FromLeft });
     }
 
     private void StreamingCoverFlow_ItemActivated(object sender, object? item)

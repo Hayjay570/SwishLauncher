@@ -160,11 +160,36 @@ public sealed partial class MainWindow : Window
 
         if (ContentFrame.CurrentSourcePageType == pageType) return;
 
-        // Use the NavigationView's recommended transition so left/right tabs
-        // slide in the correct direction, falling back to a slide transition.
-        var info = transitionOverride
-            ?? new SlideNavigationTransitionInfo
-               { Effect = SlideNavigationTransitionEffect.FromRight };
+        NavigationTransitionInfo info;
+        if (transitionOverride is not null)
+        {
+            // NavigationView already tells us the correct direction via
+            // RecommendedNavigationTransitionInfo — honour it.
+            info = transitionOverride;
+        }
+        else
+        {
+            // Fallback (e.g. gamepad RT/LT trigger): derive direction from tab order.
+            // Earlier tab → slide in from the left; later tab → slide from the right.
+            static int TabOrder(string t) => t switch
+            {
+                "Home"     => 0,
+                "Games"    => 1,
+                "Media"    => 2,
+                "Settings" => 3,
+                _          => 0
+            };
+
+            int currentOrder = TabOrder(_intendedTag);
+            int targetOrder  = TabOrder(tag);
+
+            info = new SlideNavigationTransitionInfo
+            {
+                Effect = targetOrder >= currentOrder
+                    ? SlideNavigationTransitionEffect.FromRight
+                    : SlideNavigationTransitionEffect.FromLeft
+            };
+        }
 
         ContentFrame.Navigate(pageType, null, info);
     }

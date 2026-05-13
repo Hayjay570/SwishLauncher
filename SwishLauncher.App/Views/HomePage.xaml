@@ -27,13 +27,105 @@
 
             <StackPanel Spacing="0">
 
-                <!-- ── SECTION: Featured ──────────────────────────────── -->
+                <!-- HERO BANNER: collapsed until data arrives, fades in from code-behind -->
+                <Grid
+                    x:Name="HeroBanner"
+                    Height="420"
+                    Visibility="Collapsed"
+                    Opacity="0">
+
+                    <Image
+                        x:Name="HeroImage"
+                        Stretch="UniformToFill"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"/>
+
+                    <!-- Cinematic vignette -->
+                    <Rectangle>
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#BB000000" Offset="0"/>
+                                <GradientStop Color="#00000000" Offset="0.3"/>
+                                <GradientStop Color="#00000000" Offset="0.5"/>
+                                <GradientStop Color="#EE000000" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+
+                    <!-- Content overlay -->
+                    <StackPanel
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Left"
+                        Margin="48,0,0,44"
+                        Spacing="12"
+                        MaxWidth="560">
+
+                        <TextBlock
+                            x:Name="HeroSourceBadge"
+                            Style="{ThemeResource CaptionTextBlockStyle}"
+                            CharacterSpacing="150"
+                            Foreground="#99FFFFFF"/>
+
+                        <TextBlock
+                            x:Name="HeroTitle"
+                            Style="{ThemeResource DisplayTextBlockStyle}"
+                            Foreground="White"
+                            TextTrimming="CharacterEllipsis"
+                            MaxLines="2"
+                            TextWrapping="Wrap"
+                            FontSize="40"/>
+
+                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                            <Button
+                                x:Name="HeroPlayButton"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                Click="HeroPlayButton_Click"
+                                Padding="24,10">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE102;" FontSize="16"/>
+                                    <TextBlock Text="Play"/>
+                                </StackPanel>
+                            </Button>
+                            <Button
+                                x:Name="HeroDetailsButton"
+                                Background="Transparent"
+                                BorderBrush="#66FFFFFF"
+                                Foreground="White"
+                                Click="HeroDetailsButton_Click"
+                                Padding="20,10">
+                                <TextBlock Text="More Info"/>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Grid.Resources>
+                        <Storyboard x:Key="HeroEntranceSb">
+                            <DoubleAnimation
+                                Storyboard.TargetName="HeroBanner"
+                                Storyboard.TargetProperty="Opacity"
+                                From="0" To="1"
+                                Duration="0:0:0.5">
+                                <DoubleAnimation.EasingFunction>
+                                    <QuadraticEase EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </Grid.Resources>
+                </Grid>
+
+                <!-- SECTION: Featured -->
                 <StackPanel
                     x:Name="FeaturedSection"
                     Spacing="16"
                     Padding="48,36,48,0"
                     Visibility="{x:Bind ViewModel.FeaturedGames.Count, Mode=OneWay,
                         Converter={StaticResource NonZeroToVisibilityConverter}}">
+
+                    <StackPanel.ChildrenTransitions>
+                        <TransitionCollection>
+                            <EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="30"/>
+                        </TransitionCollection>
+                    </StackPanel.ChildrenTransitions>
 
                     <TextBlock
                         Text="FEATURED"
@@ -97,13 +189,19 @@
                     </ScrollViewer>
                 </StackPanel>
 
-                <!-- ── SECTION: Recently Played ───────────────────────── -->
+                <!-- SECTION: Recently Played -->
                 <StackPanel
                     x:Name="RecentSection"
                     Spacing="16"
                     Padding="48,36,48,0"
                     Visibility="{x:Bind ViewModel.RecentlyPlayed.Count, Mode=OneWay,
                         Converter={StaticResource NonZeroToVisibilityConverter}}">
+
+                    <StackPanel.ChildrenTransitions>
+                        <TransitionCollection>
+                            <EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="30"/>
+                        </TransitionCollection>
+                    </StackPanel.ChildrenTransitions>
 
                     <TextBlock
                         Text="RECENTLY PLAYED"
@@ -166,13 +264,19 @@
                     </ScrollViewer>
                 </StackPanel>
 
-                <!-- ── SECTION: Favourites ────────────────────────────── -->
+                <!-- SECTION: Favourites -->
                 <StackPanel
                     x:Name="FavouritesSection"
                     Spacing="16"
                     Padding="48,36,48,0"
                     Visibility="{x:Bind ViewModel.Favourites.Count, Mode=OneWay,
                         Converter={StaticResource NonZeroToVisibilityConverter}}">
+
+                    <StackPanel.ChildrenTransitions>
+                        <TransitionCollection>
+                            <EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="30"/>
+                        </TransitionCollection>
+                    </StackPanel.ChildrenTransitions>
 
                     <TextBlock
                         Text="FAVOURITES"
@@ -234,7 +338,7 @@
                     </ItemsRepeater>
                 </StackPanel>
 
-                <!-- ── Empty state ────────────────────────────────────── -->
+                <!-- Empty state -->
                 <StackPanel
                     x:Name="EmptyState"
                     HorizontalAlignment="Center"

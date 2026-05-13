@@ -13,6 +13,8 @@ namespace SwishLauncher.App.Services;
 ///
 ///   RT / LT  →  cycle NavigationView tabs (wrap-around)
 ///   RB / LB  →  move focus between the major focus regions on the current page
+///   A        →  invoke the currently focused element (same as Enter/Space)
+///   B        →  go back (Frame.GoBack) if the back-stack is non-empty
 ///   D-pad    →  WinUI XY focus handles this automatically; no code needed here
 ///
 /// Trigger note: In Windows.Gaming.Input, RightTrigger and LeftTrigger are
@@ -118,7 +120,52 @@ public sealed class GamepadNavigationService : IDisposable
         else if (pressed.HasFlag(GamepadButtons.LeftShoulder))
             _dispatcherQueue.TryEnqueue(() => ShiftFocusRegion(-1));
 
+        // ── A: invoke focused element ──────────────────────────────────────
+        // Sends VirtualKey.GamepadA to the focused element so Buttons, list
+        // items, and CoverFlowControl all respond without needing special cases.
+        if (pressed.HasFlag(GamepadButtons.A))
+            _dispatcherQueue.TryEnqueue(InvokeFocusedElement);
+
+        // ── B: go back ────────────────────────────────────────────────────
+        if (pressed.HasFlag(GamepadButtons.B))
+            _dispatcherQueue.TryEnqueue(GoBack);
+
         // D-pad: WinUI spatial navigation handles this automatically.
+    }
+
+    // ── A / B button actions ───────────────────────────────────────────────
+
+    /// <summary>
+    /// Invokes the currently focused element via its AutomationPeer.
+    /// Works for Button (ButtonAutomationPeer.Invoke) and any control that
+    /// exposes IInvokeProvider.  For CoverFlowControl the existing
+    /// VirtualKey.GamepadA KeyDown handler fires first, so we don't need to
+    /// handle that case here — the focus system delivers the key naturally.
+    /// </summary>
+    private static void InvokeFocusedElement()
+    {
+        if (FocusManager.GetFocusedElement() is not UIElement focused) return;
+
+        var peer = Microsoft.UI.Xaml.Automation.Peers
+            .FrameworkElementAutomationPeer.FromElement(focused);
+
+        // IInvokeProvider covers Button, HyperlinkButton, AppBarButton, etc.
+        if (peer?.GetPattern(Microsoft.UI.Xaml.Automation.Peers.PatternInterface.Invoke)
+            is Microsoft.UI.Xaml.Automation.Provider.IInvokeProvider invoker)
+        {
+            invoker.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// Navigates back in the frame's back-stack if one exists.
+    /// The NavigationView SelectionChanged + ContentFrame_Navigated in
+    /// MainWindow will restore _intendedTag automatically.
+    /// </summary>
+    private void GoBack()
+    {
+        if (_frame.CanGoBack)
+            _frame.GoBack();
     }
 
     // ── Tab cycling ────────────────────────────────────────────────────────

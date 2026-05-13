@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using SwishLauncher.App.Helpers;
 using SwishLauncher.App.ViewModels;
 
 namespace SwishLauncher.App.Views;
@@ -22,6 +23,7 @@ public sealed partial class MediaBrowserPage : Page
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        WindowHelper.Current?.SetPageFocusRegions(MediaCoverFlow);
         if (!_loaded)
         {
             _loaded = true;
@@ -31,7 +33,9 @@ public sealed partial class MediaBrowserPage : Page
 
     private void BackButton_Click(object sender, RoutedEventArgs e)
     {
-        if (Frame.CanGoBack) Frame.GoBack();
+        if (Frame.CanGoBack)
+            Frame.GoBack(new SlideNavigationTransitionInfo
+                { Effect = SlideNavigationTransitionEffect.FromLeft });
     }
 
     private void MediaCoverFlow_ItemActivated(object sender, object? item)
