@@ -9,15 +9,17 @@ namespace SwishLauncher.Core.Services;
 public class MediaLibraryService(
     SwishDbContext db,
     IEnumerable<IMediaSource> sources,
+    TmdbMetadataService tmdb,
     ILogger<MediaLibraryService> logger)
 {
     /// <summary>
-    /// Scans all registered sources, upserts into SQLite,
-    /// and returns the complete library sorted alphabetically.
+    /// Scans all registered sources, upserts into SQLite, runs TMDB enrichment
+    /// on any entries that don't yet have metadata, then returns the full library.
     /// </summary>
     public async Task<IReadOnlyList<MediaEntry>> ScanAndSyncAsync(
         CancellationToken ct = default)
     {
+        // ── 1. Scan all sources in parallel ───────────────────────────────
         var scanTasks = sources
             .Select(s => ScanSourceSafeAsync(s, ct))
             .ToList();
@@ -29,7 +31,43 @@ public class MediaLibraryService(
             "Media scan complete. {Count} entries found across {Sources} sources.",
             scanned.Count, sources.Count());
 
+        // ── 2. Upsert into SQLite ─────────────────────────────────────────
         await UpsertAsync(scanned, ct);
+
+        // ── 3. TMDB enrichment — only entries missing metadata ────────────
+        // Load all un-enriched video entries (Music is handled by TagLib#).
+        var toEnrich = await db.Media
+            .Where(m => m.TmdbId == null &&
+                        (m.Type == MediaType.Movie || m.Type == MediaType.TvEpisode))
+            .ToListAsync(ct);
+
+        if (toEnrich.Count > 0)
+        {
+            logger.LogInformation("TMDB: enriching {Count} entries.", toEnrich.Count);
+            // forceRefresh:true — re-enriches bad cached matches and re-detects TV type
+            await tmdb.EnrichBatchAsync(toEnrich, forceRefresh: true, ct);
+
+            // Persist enriched fields back to SQLite
+            foreach (var entry in toEnrich)
+            {
+                await db.Media
+                    .Where(m => m.Id == entry.Id)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(m => m.TmdbId,       entry.TmdbId)
+                        .SetProperty(m => m.Title,         entry.Title)
+                        .SetProperty(m => m.ShowTitle,     entry.ShowTitle)
+                        .SetProperty(m => m.Description,   entry.Description)
+                        .SetProperty(m => m.Year,          entry.Year)
+                        .SetProperty(m => m.Rating,        entry.Rating)
+                        .SetProperty(m => m.PosterPath,    entry.PosterPath)
+                        .SetProperty(m => m.ThumbnailPath, entry.ThumbnailPath)
+                        .SetProperty(m => m.SeasonNumber,  entry.SeasonNumber)
+                        .SetProperty(m => m.EpisodeNumber, entry.EpisodeNumber),
+                        ct);
+            }
+
+            logger.LogInformation("TMDB enrichment persisted.");
+        }
 
         return await db.Media
             .AsNoTracking()
@@ -43,6 +81,10 @@ public class MediaLibraryService(
     /// </summary>
     public Task<List<MediaEntry>> GetAllAsync(CancellationToken ct = default)
         => db.Media.AsNoTracking().OrderBy(m => m.Title).ToListAsync(ct);
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Private helpers
+    // ─────────────────────────────────────────────────────────────────────
 
     private async Task<IEnumerable<MediaEntry>> ScanSourceSafeAsync(
         IMediaSource source, CancellationToken ct)
@@ -66,20 +108,18 @@ public class MediaLibraryService(
             .Select(g => g.First())
             .ToList();
 
-        // Build a set of all currently-valid paths for the delete pass
         var validPaths = byPath
             .Select(e => e.FilePath)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var existingPaths = await db.Media
             .AsNoTracking()
-            .Select(m => new { m.Id, m.FilePath, m.ThumbnailPath })
+            .Select(m => new { m.Id, m.FilePath, m.ThumbnailPath, m.TmdbId })
             .ToListAsync(ct);
 
         var existingByPath = existingPaths.ToDictionary(
             x => x.FilePath, x => x, StringComparer.OrdinalIgnoreCase);
 
-        // Insert / update
         foreach (var entry in byPath)
         {
             ct.ThrowIfCancellationRequested();
@@ -89,10 +129,18 @@ public class MediaLibraryService(
                 await db.Media
                     .Where(m => m.Id == existing.Id)
                     .ExecuteUpdateAsync(s => s
-                        .SetProperty(m => m.Title, entry.Title)
-                        .SetProperty(m => m.Type, entry.Type)
+                        .SetProperty(m => m.Title,  entry.Title)
+                        .SetProperty(m => m.Type,   entry.Type)
+                        // Preserve thumbnail/poster from enrichment if already set
                         .SetProperty(m => m.ThumbnailPath,
-                            entry.ThumbnailPath ?? existing.ThumbnailPath),
+                            entry.ThumbnailPath ?? existing.ThumbnailPath)
+                        // Preserve tag-derived fields for audio
+                        .SetProperty(m => m.Artist,      entry.Artist)
+                        .SetProperty(m => m.Album,       entry.Album)
+                        .SetProperty(m => m.TrackNumber, entry.TrackNumber)
+                        .SetProperty(m => m.Genre,       entry.Genre ?? null)
+                        .SetProperty(m => m.Year,
+                            entry.Year ?? null),
                         ct);
             }
             else
@@ -104,9 +152,7 @@ public class MediaLibraryService(
 
         await db.SaveChangesAsync(ct);
 
-        // ?? Tombstone pass � delete entries whose files no longer exist ????????
-        // Only runs if the scan actually found something, to avoid wiping the DB
-        // if all sources fail (e.g. external drive disconnected).
+        // Tombstone — remove entries whose files no longer exist
         if (validPaths.Count > 0)
         {
             var toDelete = existingPaths

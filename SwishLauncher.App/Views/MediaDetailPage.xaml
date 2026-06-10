@@ -32,129 +32,185 @@
 
         <Grid Grid.Row="1" ColumnDefinitions="*,*" Padding="48,24,48,36">
 
-        <!-- ── LEFT: Thumbnail ────────────────────────────────────────── -->
-        <Grid Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Border
-                Width="320" Height="420"
-                CornerRadius="16"
-                CacheMode="BitmapCache">
-                <Border.Shadow>
-                    <ThemeShadow/>
-                </Border.Shadow>
-                <Grid>
-                    <Image
-                        Source="{x:Bind ViewModel.ThumbnailPath, Mode=OneWay,
-                            Converter={StaticResource PathToImageSourceConverter}}"
-                        Stretch="UniformToFill"/>
-                    <FontIcon
-                        Glyph="&#xE8B2;"
-                        FontSize="80"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Opacity="0.3"
-                        Visibility="{x:Bind ViewModel.ThumbnailPath,
-                            Mode=OneWay,
-                            Converter={StaticResource NullToVisibleConverter}}"/>
-                </Grid>
-            </Border>
-        </Grid>
+            <!-- ── LEFT: Poster / Thumbnail ──────────────────────────────── -->
+            <Grid Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border
+                    Width="320" Height="420"
+                    CornerRadius="16"
+                    CacheMode="BitmapCache">
+                    <Border.Shadow>
+                        <ThemeShadow/>
+                    </Border.Shadow>
+                    <Grid>
+                        <Image
+                            Source="{x:Bind ViewModel.ThumbnailPath, Mode=OneWay,
+                                Converter={StaticResource PathToImageSourceConverter}}"
+                            Stretch="UniformToFill"/>
+                        <!-- Placeholder icon shown when no art is available -->
+                        <FontIcon
+                            Glyph="&#xE8B2;"
+                            FontSize="80"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Opacity="0.3"
+                            Visibility="{x:Bind ViewModel.ThumbnailPath,
+                                Mode=OneWay,
+                                Converter={StaticResource NullToVisibleConverter}}"/>
+                    </Grid>
+                </Border>
+            </Grid>
 
-        <!-- ── RIGHT: Single acrylic island ───────────────────────────── -->
-        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0">
+            <!-- ── RIGHT: Metadata island ────────────────────────────────── -->
+            <Grid Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0">
 
-            <Border CornerRadius="16" Padding="32">
-                <Border.Background>
-                    <AcrylicBrush
-                        TintColor="#141414"
-                        TintOpacity="0.7"
-                        FallbackColor="#242424"/>
-                </Border.Background>
-                <Border.Shadow>
-                    <ThemeShadow/>
-                </Border.Shadow>
+                <Border CornerRadius="16" Padding="32">
+                    <Border.Background>
+                        <AcrylicBrush
+                            TintColor="#141414"
+                            TintOpacity="0.7"
+                            FallbackColor="#242424"/>
+                    </Border.Background>
+                    <Border.Shadow>
+                        <ThemeShadow/>
+                    </Border.Shadow>
 
-                <StackPanel Spacing="20">
+                    <StackPanel Spacing="16">
 
-                    <!-- Title + Type + Year (type uppercased in ViewModel) -->
-                    <StackPanel Spacing="4">
-                        <TextBlock
-                            Text="{x:Bind ViewModel.Title, Mode=OneWay}"
-                            Style="{ThemeResource TitleLargeTextBlockStyle}"
-                            TextWrapping="Wrap"
-                            MaxLines="2"/>
-                        <StackPanel Orientation="Horizontal" Spacing="8">
+                        <!-- Title + type badge + year -->
+                        <StackPanel Spacing="4">
                             <TextBlock
-                                Text="{x:Bind ViewModel.MediaType, Mode=OneWay}"
+                                Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+                                Style="{ThemeResource TitleLargeTextBlockStyle}"
+                                TextWrapping="Wrap"
+                                MaxLines="2"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock
+                                    Text="{x:Bind ViewModel.MediaType, Mode=OneWay}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Opacity="0.6"
+                                    CharacterSpacing="80"/>
+                                <TextBlock Text="·" Opacity="0.4"
+                                           Style="{ThemeResource CaptionTextBlockStyle}"/>
+                                <TextBlock
+                                    Text="{x:Bind ViewModel.Year, Mode=OneWay}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Opacity="0.6"/>
+                                <!-- Genre pill — hidden when empty -->
+                                <Border
+                                    CornerRadius="4"
+                                    Padding="6,2"
+                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                    Opacity="0.8"
+                                    Visibility="{x:Bind ViewModel.Genre, Mode=OneWay,
+                                        Converter={StaticResource NullToVisibleConverter}}">
+                                    <TextBlock
+                                        Text="{x:Bind ViewModel.Genre, Mode=OneWay}"
+                                        Style="{ThemeResource CaptionTextBlockStyle}"
+                                        Foreground="White"/>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- TV-specific: show title + episode -->
+                        <StackPanel
+                            Spacing="2"
+                            Visibility="{x:Bind ViewModel.IsTv, Mode=OneWay,
+                                Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock
+                                Text="{x:Bind ViewModel.ShowTitle, Mode=OneWay}"
+                                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                Opacity="0.9"/>
+                            <TextBlock
+                                Text="{x:Bind ViewModel.Episode, Mode=OneWay}"
                                 Style="{ThemeResource CaptionTextBlockStyle}"
                                 Opacity="0.6"
-                                CharacterSpacing="80"/>
-                            <TextBlock Text="·" Opacity="0.4" Style="{ThemeResource CaptionTextBlockStyle}"/>
+                                CharacterSpacing="40"/>
+                        </StackPanel>
+
+                        <!-- Music-specific: artist + album -->
+                        <StackPanel
+                            Spacing="2"
+                            Visibility="{x:Bind ViewModel.IsMusic, Mode=OneWay,
+                                Converter={StaticResource BoolToVisibilityConverter}}">
                             <TextBlock
-                                Text="{x:Bind ViewModel.Year, Mode=OneWay}"
+                                Text="{x:Bind ViewModel.Artist, Mode=OneWay}"
+                                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                Opacity="0.9"/>
+                            <TextBlock
+                                Text="{x:Bind ViewModel.Album, Mode=OneWay}"
                                 Style="{ThemeResource CaptionTextBlockStyle}"
                                 Opacity="0.6"/>
                         </StackPanel>
+
+                        <!-- TMDB rating -->
+                        <RatingControl
+                            Value="{x:Bind ViewModel.Rating, Mode=OneWay}"
+                            IsReadOnly="True"
+                            MaxRating="5"/>
+
+                        <!-- Divider -->
+                        <Border Height="1"
+                                Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                Opacity="0.3"/>
+
+                        <!-- Description -->
+                        <TextBlock
+                            Text="{x:Bind ViewModel.Description, Mode=OneWay}"
+                            Style="{ThemeResource BodyTextBlockStyle}"
+                            TextWrapping="Wrap"
+                            MaxLines="5"
+                            TextTrimming="CharacterEllipsis"
+                            Opacity="0.85"
+                            LineHeight="22"/>
+
+                        <!-- Date added -->
+                        <StackPanel Spacing="2">
+                            <TextBlock
+                                Text="DATE ADDED"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Opacity="0.5"
+                                CharacterSpacing="60"/>
+                            <TextBlock
+                                Text="{x:Bind ViewModel.DateAdded, Mode=OneWay}"
+                                Style="{ThemeResource BodyStrongTextBlockStyle}"/>
+                        </StackPanel>
+
+                        <!-- Divider -->
+                        <Border Height="1"
+                                Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                Opacity="0.3"/>
+
+                        <!-- Action row -->
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+
+                            <Button
+                                Grid.Column="0"
+                                Content="▶  Play"
+                                Command="{x:Bind ViewModel.PlayCommand}"
+                                IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay,
+                                    Converter={StaticResource BoolNegationConverter}}"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                HorizontalAlignment="Stretch"
+                                Height="48"
+                                FontSize="16"/>
+
+                            <Button
+                                Grid.Column="1"
+                                Command="{x:Bind ViewModel.ToggleFavouriteCommand}"
+                                Width="48" Height="48"
+                                ToolTipService.ToolTip="Add to favourites"
+                                Padding="0">
+                                <FontIcon
+                                    Glyph="{x:Bind ViewModel.IsFavourite, Mode=OneWay,
+                                        Converter={StaticResource FavouriteGlyphConverter}}"
+                                    FontSize="18"/>
+                            </Button>
+
+                        </Grid>
+
                     </StackPanel>
-
-                    <!-- Rating -->
-                    <RatingControl
-                        Value="{x:Bind ViewModel.Rating, Mode=OneWay}"
-                        IsReadOnly="True"
-                        MaxRating="5"/>
-
-                    <!-- Divider -->
-                    <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Opacity="0.3"/>
-
-                    <!-- Description -->
-                    <TextBlock
-                        Text="{x:Bind ViewModel.Description, Mode=OneWay}"
-                        Style="{ThemeResource BodyTextBlockStyle}"
-                        TextWrapping="Wrap"
-                        MaxLines="6"
-                        TextTrimming="CharacterEllipsis"
-                        Opacity="0.85"
-                        LineHeight="22"/>
-
-                    <!-- Date added -->
-                    <StackPanel Spacing="2">
-                        <TextBlock Text="DATE ADDED" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.5" CharacterSpacing="60"/>
-                        <TextBlock Text="{x:Bind ViewModel.DateAdded, Mode=OneWay}" Style="{ThemeResource BodyStrongTextBlockStyle}"/>
-                    </StackPanel>
-
-                    <!-- Divider -->
-                    <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Opacity="0.3"/>
-
-                    <!-- Action row -->
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-
-                        <Button
-                            Grid.Column="0"
-                            Content="▶  Play"
-                            Command="{x:Bind ViewModel.PlayCommand}"
-                            IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay,
-                                Converter={StaticResource BoolNegationConverter}}"
-                            Style="{ThemeResource AccentButtonStyle}"
-                            HorizontalAlignment="Stretch"
-                            Height="48"
-                            FontSize="16"/>
-
-                        <Button
-                            Grid.Column="1"
-                            Command="{x:Bind ViewModel.ToggleFavouriteCommand}"
-                            Width="48" Height="48"
-                            ToolTipService.ToolTip="Add to favourites"
-                            Padding="0">
-                            <FontIcon
-                                Glyph="{x:Bind ViewModel.IsFavourite, Mode=OneWay,
-                                    Converter={StaticResource FavouriteGlyphConverter}}"
-                                FontSize="18"/>
-                        </Button>
-
-                    </Grid>
-
-                </StackPanel>
-            </Border>
-        </Grid>
+                </Border>
+            </Grid>
 
         </Grid>
 
