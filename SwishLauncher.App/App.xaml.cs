@@ -26,7 +26,7 @@ public partial class App : Application
     // ── TMDB API key ──────────────────────────────────────────────────────
     // Replace with your key from https://www.themoviedb.org/settings/api
     // In Week 10 this will move to the Settings page + local storage.
-    private const string TmdbApiKey = "5304684eede21f71700f7c0ab576760d";
+    private const string TmdbApiKey = "";
 
     public App()
     {
